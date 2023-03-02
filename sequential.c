@@ -2,8 +2,35 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INFILE "numeros.csv"
-#define OUTFILE "primos.csv"
+
+//comparar
+int compare (const int * a, const int * b) //what is it returning?
+{
+   return ( *(int*)a - *(int*)b ); //What is a and b?
+}
+
+void par_qsort(int *data, int lo, int hi) //}, int (*compare)(const int *, const int*))
+{
+  if(lo > hi) return;
+  int l = lo;
+  int h = hi;
+  int p = data[(hi + lo)/2];
+
+  while(l <= h){
+    while((data[l] - p) < 0) l++;
+    while((data[h] - p) > 0) h--;
+    if(l<=h){
+      //swap
+      int tmp = data[l];
+      data[l] = data[h];
+      data[h] = tmp;
+      l++; h--;
+    }
+  }
+  //recursive call
+  par_qsort(data, lo, h);
+  par_qsort(data, l, hi);
+}
 
 int main(int argc, char * argv[]) {
 
@@ -39,6 +66,29 @@ int main(int argc, char * argv[]) {
     for (j=0; j<n; j++){
         printf("%d ", Array[j]);
     }
+
+    fclose(fp2);
+
+    //Sort array
+    par_qsort(Array, 0, n-1);
+    printf("\n");
+    //Print array
+    for (j=0; j<n; j++){
+        printf("%d ", Array[j]);
+    }
+
+    //Write into another file
+    FILE *fp3;
+    fp3 = fopen("ordenados.csv", "w");
+
+    for (j=0; j<n-1; j++){
+        //Write to file in csv separated by comma
+        fprintf(fp3, "%d,", Array[j]);
+    }
+    fprintf(fp3, "%d", Array[n-1]);
+    fclose(fp3);
+
+
 
 
     /*----------
