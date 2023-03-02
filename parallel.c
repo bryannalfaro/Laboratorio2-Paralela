@@ -14,11 +14,6 @@ Codigo proporcionado como base
 #include <time.h>
 #include<omp.h>
 
-int compare(const int *a, const int *b)
-{
-    return (*(int *)a - *(int *)b);
-}
-
 void par_qsort(int *data, int lo, int hi)
 {
     if (lo > hi)
@@ -26,7 +21,6 @@ void par_qsort(int *data, int lo, int hi)
     int l = lo;
     int h = hi;
     int p = data[(hi + lo) / 2];
-
     while (l <= h)
     {
         while ((data[l] - p) < 0)
@@ -44,6 +38,7 @@ void par_qsort(int *data, int lo, int hi)
         }
     }
     // recursive call
+
     par_qsort(data, lo, h);
     par_qsort(data, l, hi);
 }
@@ -53,21 +48,27 @@ int main(int argc, char *argv[])
 
     // receive N from command line
     int n = atoi(argv[1]);
+    int thread_count = atoi(argv[2]);
     if (n == 0)
         n = 10;
+    if (thread_count == 0)
+        thread_count = 8;
+
     int Array[n];
     int j;
-    srand(time(NULL)); //To get random every time
-    //measure time for sequential in omp
+    srand(time(NULL));
+    //measures time
     double start = omp_get_wtime();
 
+    #pragma omp parallel for num_threads(thread_count)
     for (j = 0; j < n; j++)
 
         Array[j] = rand() % n;
 
+
     // Open the file in write mode
     FILE *fp;
-    fp = fopen("aleatorios.csv", "w");
+    fp = fopen("aleatorios_p.csv", "w");
     if (fp == NULL)
     {
         printf("Error opening file");
@@ -75,6 +76,7 @@ int main(int argc, char *argv[])
     }
 
     // Write to file
+    #pragma omp parallel for num_threads(thread_count)
     for (j = 0; j < n - 1; j++)
     {
         fprintf(fp, "%d,", Array[j]);
@@ -84,7 +86,7 @@ int main(int argc, char *argv[])
 
     // Open the file in read mode
     FILE *fp2;
-    fp2 = fopen("aleatorios.csv", "r");
+    fp2 = fopen("aleatorios_p.csv", "r");
     if (fp2 == NULL)
     {
         printf("Error opening file");
@@ -101,24 +103,37 @@ int main(int argc, char *argv[])
     fclose(fp2);
 
     // Sort array
-    par_qsort(Array, 0, n - 1);
+    #pragma omp parallel
+    {
+    #pragma omp single
+    {
+       par_qsort(Array, 0, n - 1);
+    }
+    }
+
 
     // Write into another file
     FILE *fp3;
-    fp3 = fopen("ordenados.csv", "w");
+    fp3 = fopen("ordenados_p.csv", "w");
     if (fp3 == NULL)
     {
         printf("Error opening file");
         exit(1);
     }
-
+    #pragma omp sections
+    {
+    #pragma omp section
+    {
     for (j = 0; j < n - 1; j++)
     {
+
         fprintf(fp3, "%d,", Array[j]);
     }
     fprintf(fp3, "%d", Array[n - 1]);
-    fclose(fp3);
 
+    fclose(fp3);
+    }
+    }
     double end = omp_get_wtime();
     printf("Time: %f", end - start);
 
