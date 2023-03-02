@@ -1,152 +1,119 @@
+/*
+Laboratorio 2
+Bryann Alfaro
+Osmin Orellana
+
+Referencias:
+https://www.geeksforgeeks.org/basics-file-handling-c/
+https://www.programiz.com/c-programming/c-file-input-output
+Codigo proporcionado como base
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-
-//comparar
-int compare (const int * a, const int * b) //what is it returning?
+int compare(const int *a, const int *b)
 {
-   return ( *(int*)a - *(int*)b ); //What is a and b?
+    return (*(int *)a - *(int *)b);
 }
 
-void par_qsort(int *data, int lo, int hi) //}, int (*compare)(const int *, const int*))
+void par_qsort(int *data, int lo, int hi)
 {
-  if(lo > hi) return;
-  int l = lo;
-  int h = hi;
-  int p = data[(hi + lo)/2];
+    if (lo > hi)
+        return;
+    int l = lo;
+    int h = hi;
+    int p = data[(hi + lo) / 2];
 
-  while(l <= h){
-    while((data[l] - p) < 0) l++;
-    while((data[h] - p) > 0) h--;
-    if(l<=h){
-      //swap
-      int tmp = data[l];
-      data[l] = data[h];
-      data[h] = tmp;
-      l++; h--;
+    while (l <= h)
+    {
+        while ((data[l] - p) < 0)
+            l++;
+        while ((data[h] - p) > 0)
+            h--;
+        if (l <= h)
+        {
+            // swap
+            int tmp = data[l];
+            data[l] = data[h];
+            data[h] = tmp;
+            l++;
+            h--;
+        }
     }
-  }
-  //recursive call
-  par_qsort(data, lo, h);
-  par_qsort(data, l, hi);
+    // recursive call
+    par_qsort(data, lo, h);
+    par_qsort(data, l, hi);
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[])
+{
 
-    int n = 10;
+    // receive N from command line
+    int n = atoi(argv[1]);
+    if (n == 0)
+        n = 10;
     int Array[n];
     int j;
+    srand(time(NULL));
+    for (j = 0; j < n; j++)
 
-    printf("Generando lista random con %d elementos\n", n);
+        Array[j] = rand() % 50;
 
-    for (j=0; j<n; j++)
-        Array[j] = rand()%10;
-
+    // Open the file in write mode
     FILE *fp;
     fp = fopen("aleatorios.csv", "w");
-    //Print array
-    for (j=0; j<n-1; j++){
-        //Write to file in csv separated by comma
+    if (fp == NULL)
+    {
+        printf("Error opening file");
+        exit(1);
+    }
+
+    // Write to file
+    for (j = 0; j < n - 1; j++)
+    {
         fprintf(fp, "%d,", Array[j]);
     }
-    fprintf(fp, "%d", Array[n-1]);
+    fprintf(fp, "%d", Array[n - 1]);
     fclose(fp);
 
-    //Read file
+    // Open the file in read mode
     FILE *fp2;
     fp2 = fopen("aleatorios.csv", "r");
+    if (fp2 == NULL)
+    {
+        printf("Error opening file");
+        exit(1);
+    }
     int i = 0;
     char ch;
-    //Read with fscanf
-    while (fscanf(fp2, "%d,", &Array[i]) != EOF){
+    // Read with fscanf
+    while (fscanf(fp2, "%d,", &Array[i]) != EOF)
+    {
         i++;
-    }
-    //Print array
-    for (j=0; j<n; j++){
-        printf("%d ", Array[j]);
     }
 
     fclose(fp2);
 
-    //Sort array
-    par_qsort(Array, 0, n-1);
-    printf("\n");
-    //Print array
-    for (j=0; j<n; j++){
-        printf("%d ", Array[j]);
-    }
+    // Sort array
+    par_qsort(Array, 0, n - 1);
 
-    //Write into another file
+    // Write into another file
     FILE *fp3;
     fp3 = fopen("ordenados.csv", "w");
+    if (fp3 == NULL)
+    {
+        printf("Error opening file");
+        exit(1);
+    }
 
-    for (j=0; j<n-1; j++){
-        //Write to file in csv separated by comma
+    for (j = 0; j < n - 1; j++)
+    {
         fprintf(fp3, "%d,", Array[j]);
     }
-    fprintf(fp3, "%d", Array[n-1]);
+    fprintf(fp3, "%d", Array[n - 1]);
     fclose(fp3);
-
-
-
-
-    /*----------
-     *Constructor del manejador de archivos
-     *
-     *  in/out - fstream <identificador>("<archivo>",modo)
-     *  out only - ofstream <identificador>("<archivo>",modo)
-     *  in only - ifstream <identificador>("<archivo>")
-     *
-     *  modos:
-     *      ios::app - append to file
-     *      ios::out - new/overwrite file
-     *      ios::binary - nontext input & output
-     *      ios::in - read from file
-     */
-    /*ofstream escribirNumeros(INFILE,ios::out);
-    if( escribirNumeros.bad() ) {
-        cerr<<"Falló la creación del archivo "<<INFILE<<endl;
-        exit(EXIT_FAILURE);
-    }
-
-    //Llenamos el archivo INFILE con números
-    for(int i=0; i<limit;i++){
-        escribirNumeros<<i<<",";
-    }
-    escribirNumeros<<limit<<endl;
-    escribirNumeros.close();    //Cerramos el archivo si no lo vamos a usar nuevamente
-
-    //Constructores para lectura de archivo y escritura de resultados
-    //Esta es otra forma de realizar el manejo de arhivos
-    ifstream leerNumeros;
-    leerNumeros.open(INFILE);
-    if( leerNumeros.bad() ) {
-        cerr<<"No se pudo leer el archivo "<<INFILE<<endl;
-        exit(EXIT_FAILURE);
-    }
-
-    ofstream escribirPrimos;
-    escribirPrimos.open(OUTFILE);
-    if( escribirPrimos.bad() ) {
-        cerr<<"No se pudo crear el archivo "<<OUTFILE<<endl;
-        exit(EXIT_FAILURE);
-    }
-
-    //Probamos que un número sea primo y lo escribimos al archivo OUTFILE
-    string ch;
-    while(getline(leerNumeros,ch,',')) {
-
-        int numero = stoi(ch);  //Debemos convertir el string a int
-
-        if(isPrime(numero)) {
-            cout<<ch<<" ";
-            escribirPrimos<<ch<<" ";
-        }
-    }
-    cout<<endl;*/
-
-
 
     return 0;
 }
