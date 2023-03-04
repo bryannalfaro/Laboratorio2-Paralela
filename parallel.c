@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
     // receive N from command line
     int n = atoi(argv[1]);
     int thread_count = atoi(argv[2]);
+    double seq_time = 0.5846;
     if (n == 0)
         n = 10;
     if (thread_count == 0)
@@ -135,7 +136,10 @@ int main(int argc, char *argv[])
     }
     }
     double end = omp_get_wtime();
-    printf("Time: %f", end - start);
+    printf("Time: %f\n", end - start);
+    printf("Speedup: %f\n", seq_time / (end - start));
+    //Efficiency
+    printf("Efficiency: %f", (seq_time / (end - start)) / thread_count);
 
     return 0;
 }
