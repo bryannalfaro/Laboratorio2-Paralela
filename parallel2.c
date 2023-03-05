@@ -23,11 +23,16 @@ void par_qsort(int *data, int lo, int hi)
     int p = data[(hi + lo) / 2];
     while (l <= h)
     {
-        
+
         while ((data[l] - p) < 0)
+        // #pragma omp atomic
             l++;
+
         while ((data[h] - p) > 0)
+        // #pragma omp atomic
             h--;
+
+
         if (l <= h)
         {
             // swap
@@ -40,8 +45,24 @@ void par_qsort(int *data, int lo, int hi)
     }
     // recursive call
 
-    par_qsort(data, lo, h);
-    par_qsort(data, l, hi);
+#pragma omp parallel sections shared(data)
+    {
+        #pragma omp section
+        par_qsort(data, lo, h);
+
+        #pragma omp section
+        par_qsort(data, l, hi);
+    }
+
+    // #pragma omp task
+    // #pragma omp task shared(data) if(h-l > 100)
+    // par_qsort(data, lo, h);
+
+    // #pragma omp task
+    // #pragma omp task shared(data) if(h-l > 100)
+    // par_qsort(data, l, hi);
+
+    // #pragma omp taskwait
 }
 
 int main(int argc, char *argv[])
@@ -111,6 +132,7 @@ int main(int argc, char *argv[])
     {
        par_qsort(Array, 0, n - 1);
     }
+    // #pragma omp taskwait
     }
 
 
