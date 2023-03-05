@@ -12,7 +12,7 @@ Codigo proporcionado como base
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include<omp.h>
+#include <omp.h>
 
 void par_qsort(int *data, int lo, int hi)
 {
@@ -23,7 +23,7 @@ void par_qsort(int *data, int lo, int hi)
     int p = data[(hi + lo) / 2];
     while (l <= h)
     {
-        
+
         while ((data[l] - p) < 0)
             l++;
         while ((data[h] - p) > 0)
@@ -59,14 +59,13 @@ int main(int argc, char *argv[])
     int Array[n];
     int j;
     srand(time(NULL));
-    //measures time
+    // measures time
     double start = omp_get_wtime();
 
-    #pragma omp parallel for num_threads(thread_count)
+#pragma omp parallel for num_threads(thread_count)
     for (j = 0; j < n; j++)
 
         Array[j] = rand() % n;
-
 
     // Open the file in write mode
     FILE *fp;
@@ -77,8 +76,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    // Write to file
-    #pragma omp parallel for num_threads(thread_count)
+// Write to file
+#pragma omp parallel for num_threads(thread_count)
     for (j = 0; j < n - 1; j++)
     {
         fprintf(fp, "%d,", Array[j]);
@@ -104,15 +103,14 @@ int main(int argc, char *argv[])
 
     fclose(fp2);
 
-    // Sort array
-    #pragma omp parallel
+// Sort array
+#pragma omp parallel
     {
-    #pragma omp single
-    {
-       par_qsort(Array, 0, n - 1);
+#pragma omp single
+        {
+            par_qsort(Array, 0, n - 1);
+        }
     }
-    }
-
 
     // Write into another file
     FILE *fp3;
@@ -122,24 +120,24 @@ int main(int argc, char *argv[])
         printf("Error opening file");
         exit(1);
     }
-    #pragma omp sections
+#pragma omp sections
     {
-    #pragma omp section
-    {
-    for (j = 0; j < n - 1; j++)
-    {
+#pragma omp section
+        {
+            for (j = 0; j < n - 1; j++)
+            {
 
-        fprintf(fp3, "%d,", Array[j]);
-    }
-    fprintf(fp3, "%d", Array[n - 1]);
+                fprintf(fp3, "%d,", Array[j]);
+            }
+            fprintf(fp3, "%d", Array[n - 1]);
 
-    fclose(fp3);
-    }
+            fclose(fp3);
+        }
     }
     double end = omp_get_wtime();
     printf("Time: %f\n", end - start);
     printf("Speedup: %f\n", seq_time / (end - start));
-    //Efficiency
+    // Efficiency
     printf("Efficiency: %f", (seq_time / (end - start)) / thread_count);
 
     return 0;

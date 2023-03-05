@@ -12,7 +12,7 @@ Codigo proporcionado como base
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include<omp.h>
+#include <omp.h>
 
 int compare(const int *a, const int *b)
 {
@@ -57,8 +57,8 @@ int main(int argc, char *argv[])
         n = 10;
     int Array[n];
     int j;
-    srand(time(NULL)); //To get random every time
-    //measure time for sequential in omp
+    srand(time(NULL)); // To get random every time
+    // measure time for sequential in omp
     double start = omp_get_wtime();
 
     for (j = 0; j < n; j++)
